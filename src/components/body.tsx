@@ -1,11 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { ReactElement, useState, useEffect, useRef } from "react";
 import { useCookies } from "react-cookie";
+import fs from "fs";
 
 const Body = (props: any) => {
+	var fr = new FileReader();
 	const [cookies, setCookie] = useCookies();
 	type Squares = { past: Array<string>; current: string; total: number; currentLength: number };
-	const word: string = "LAUGH";
+	const [word, setWord] = useState<string>("");
 	const keyboardData = useRef({ code: "", key: "" });
 	const [squares, setSquares] = useState<Squares>({ past: [], current: "", total: 1, currentLength: 0 });
 
@@ -46,6 +48,12 @@ const Body = (props: any) => {
 			}
 		} else setSquares({ ...squares });
 	};
+
+	useEffect(() => {
+		fetch("https://us-central1-wordle-9d59a.cloudfunctions.net/word")
+			.then((response) => response.text())
+			.then((data) => setWord(data));
+	}, []);
 
 	// Handles keypress data from inbuilt keyboard
 	useEffect(() => {

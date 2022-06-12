@@ -44,7 +44,7 @@ const Keyboard = (props: any) => {
 			}
 
 			output.push(
-				<span key="row1" className="flex gap-x-1 justify-center">
+				<span key={i} className="flex gap-x-1 justify-center">
 					{row}
 				</span>
 			);

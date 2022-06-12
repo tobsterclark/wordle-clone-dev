@@ -21,7 +21,6 @@ const Statistics = () => {
 					</div>
 				</div>
 			</div>
-			<div className="font-black text-2xl">Average score</div>
 		</div>
 	);
 };

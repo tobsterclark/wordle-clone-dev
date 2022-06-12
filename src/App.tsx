@@ -26,15 +26,21 @@ function App() {
 		);
 	};
 
-	useEffect(() => {
-		//Grab word
-		const databaseWord = "WORTH";
+	const fetchWord = async () => {
+		let word: string = "";
+		await fetch("https://us-central1-wordle-9d59a.cloudfunctions.net/word")
+			.then((response) => response.text())
+			.then((data) => (word = data));
 
 		if (cookies.completed) {
 			if (cookies.completed.completed) {
-				if (databaseWord !== cookies.word) setCookie("completed", { completed: false, type: "" });
+				if (word !== cookies.word) setCookie("completed", { completed: false, type: "" });
 			}
 		}
+	};
+
+	useEffect(() => {
+		fetchWord();
 	}, []);
 
 	const main = () => {
