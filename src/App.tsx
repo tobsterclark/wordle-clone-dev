@@ -7,7 +7,8 @@ import Statistics from "./components/statistics";
 import { useCookies } from "react-cookie";
 
 function App() {
-	const [bodyData, setBodyData] = useState<any>(() => console.log("test"));
+	const [bodyData, setBodyData] = useState<any>();
+	const [word, setWord] = useState<string>("");
 	const [keyboardData, setKeyboardData] = useState<any>({ code: "", key: "" });
 	const [cookies, setCookie] = useCookies();
 	const [completed, setCompleted] = useState<{ completed: boolean; type: string }>({ completed: false, type: "" });
@@ -20,21 +21,24 @@ function App() {
 	const renderComplete = (type: string) => {
 		return (
 			<div className="boder-2 text-center flex flex-col justify-center items-center h-full gap-10">
-				<span>{type === "win" ? "You won todays wordle!" : "You lost todays wordle."}</span>
+				<span>{type === "win" ? "You won todays wordle! The word is " + word.toLowerCase() : "You lost todays wordle. The word is " + word.toLowerCase()}</span>
 				<Statistics />
 			</div>
 		);
 	};
 
 	const fetchWord = async () => {
-		let word: string = "";
+		let databaseWord: string = "";
 		await fetch("https://us-central1-wordle-9d59a.cloudfunctions.net/word")
 			.then((response) => response.text())
-			.then((data) => (word = data));
+			.then((data) => {
+				databaseWord = data;
+				setWord(data);
+			});
 
 		if (cookies.completed) {
 			if (cookies.completed.completed) {
-				if (word !== cookies.word) setCookie("completed", { completed: false, type: "" });
+				if (databaseWord !== cookies.word) setCookie("completed", { completed: false, type: "" });
 			}
 		}
 	};
