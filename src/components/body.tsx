@@ -1,9 +1,11 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { ReactElement, useState, useEffect, useRef } from "react";
 import { useCookies } from "react-cookie";
+import useToast from "../Toastable";
 
 const Body = (props: any) => {
 	const [cookies, setCookie] = useCookies();
+	const toast = useToast();
 	type Squares = { past: Array<string>; current: string; total: number; currentLength: number };
 	const [word, setWord] = useState<string>("");
 	const [wordList, setWordList] = useState<Array<string>>([""]);
@@ -17,7 +19,7 @@ const Body = (props: any) => {
 		// If key entered is a letter
 		if (keyboardEvent.code.includes("Key")) {
 			if (squares.currentLength >= 5) {
-				alert("Too long");
+				toast({ type: "error", msg: "Too long" });
 				setSquares({ ...squares });
 			} else {
 				const newCurrent: string = squares.current + keyboardEvent.key.toUpperCase();
@@ -27,7 +29,7 @@ const Body = (props: any) => {
 			// If key entered is a backspace
 		} else if (keyboardEvent.code.includes("Backspace")) {
 			if (squares.currentLength === 0) {
-				alert("Too short");
+				toast({ type: "error", msg: "Too short" });
 				setSquares({ ...squares });
 			} else {
 				const newCurrent: string = squares.current.substring(0, squares.current.length - 1);
@@ -42,9 +44,9 @@ const Body = (props: any) => {
 					const newPast: Array<string> = [...squares.past];
 					newPast.push(squares.current);
 					setSquares({ past: newPast, current: "", total: squares.total + 1, currentLength: 0 });
-				} else alert("word not in word list");
+				} else toast({ type: "error", msg: "Word not in word list" });
 			} else {
-				alert("Too short");
+				toast({ type: "error", msg: "Too short" });
 				setSquares({ ...squares });
 			}
 		} else setSquares({ ...squares });

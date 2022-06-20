@@ -4,6 +4,7 @@ import Header from "./components/header";
 import Body from "./components/body";
 import Keyboard from "./components/keyboard";
 import Statistics from "./components/statistics";
+import useToast from "./Toastable";
 import { useCookies } from "react-cookie";
 
 function App() {
