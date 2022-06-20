@@ -1,11 +1,19 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+
+/* 
+
+Author: Toby Clark
+Updated: 18/06/22
+Purpose: This component renders the 5 x 5 grid layout as well as running the main game functions
+
+*/
+
 import React, { ReactElement, useState, useEffect, useRef } from "react";
 import { useCookies } from "react-cookie";
-import useToast from "../Toastable";
+import toast from "../Toastable";
 
 const Body = (props: any) => {
 	const [cookies, setCookie] = useCookies();
-	const toast = useToast();
 	type Squares = { past: Array<string>; current: string; total: number; currentLength: number };
 	const [word, setWord] = useState<string>("");
 	const [wordList, setWordList] = useState<Array<string>>([""]);
@@ -15,8 +23,10 @@ const Body = (props: any) => {
 	// Functions to trigger onKeyPress from inbuilt keyboard
 	const handleInbuiltKeyboardPress = () => onKeyPress(keyboardData.current);
 
+	// onKeyPress' purpose is to handle key inputs into the 5x5 grid, it can either be triggered by
+	// the users keyboard or by the inbuilt keyboard
 	const onKeyPress = (keyboardEvent: KeyboardEvent | { code: string; key: string }) => {
-		// If key entered is a letter
+		// If key entered is a letter (All letters start with the word Key)
 		if (keyboardEvent.code.includes("Key")) {
 			if (squares.currentLength >= 5) {
 				toast({ type: "error", msg: "Too long" });
@@ -52,6 +62,8 @@ const Body = (props: any) => {
 		} else setSquares({ ...squares });
 	};
 
+	// This function runs once when the grid is first rendered, it grabs both the word of the day and the list
+	// of all valid words. Words are valid or not based off of the scrabble dictionary
 	useEffect(() => {
 		fetch("https://us-central1-wordle-9d59a.cloudfunctions.net/word")
 			.then((response) => response.text())
@@ -65,15 +77,20 @@ const Body = (props: any) => {
 			});
 	}, []);
 
-	// Handles keypress data from inbuilt keyboard
+	// Handles keypress data from inbuilt keyboard, reruns if props.keyboard data is changed
 	useEffect(() => {
 		keyboardData.current = props.keyboardData;
 	}, [props.keyboardData]);
 
 	// Main effect loop, is run evertime squares is changed
 	useEffect(() => {
+		// Sends the function which handles inbuilt keyboard presses to parent function.
+		// This will be called from keyboard.tsk
 		props.dataToParent("body", handleInbuiltKeyboardPress);
 
+		// Checks if the user has correctly guessed the word or if they have run out of space,
+		// if so updates the cookies holding score, the total games, the total wins.
+		// Then sends "completed" to the parent component (App.tsx)
 		if (squares.past.includes(word)) {
 			setCookie("word", word);
 			setCookie("total", (cookies.total ? parseInt(cookies.total) : 0) + 1);
@@ -91,11 +108,14 @@ const Body = (props: any) => {
 			setCookie("completed", { completed: true, type: "loss" });
 		}
 
+		// Creates a listener checking if a key is pressed
 		document.addEventListener("keyup", onKeyPress);
+
+		// Deletes the listener in case squares is re-rendered through inbuilt keyboard
 		return () => document.removeEventListener("keyup", onKeyPress);
 	}, [squares]);
 
-	// Check if a letter is correct, in the wrong spot or wrong
+	// Check if a letter is correct, in the wrong spot or outright wrong and sets letter colour accordingly
 	const correct = (letter: string, index: number) => {
 		if (word.includes(letter)) {
 			for (let i = 0; i < word.length; i++) {
@@ -111,6 +131,7 @@ const Body = (props: any) => {
 	const renderSquares = () => {
 		const output: Array<ReactElement> = [];
 		let row: Array<ReactElement> = [];
+		// Runs through past guesses and renders each one
 		for (let i in squares.past) {
 			for (let t = 0; t < 5; t++) {
 				row.push(
@@ -127,6 +148,7 @@ const Body = (props: any) => {
 			row = [];
 		}
 
+		// Renders the current guess (If not all 5 letters will render blank tiles to fill up space)
 		if (squares.total < 6) {
 			for (let i = 0; i < 5; i++) {
 				if (i < squares.currentLength)
@@ -137,7 +159,7 @@ const Body = (props: any) => {
 					);
 				else
 					row.push(
-						<span key={i} className="h-full border-gray-500 border-2 text-transparent">
+						<span key={i} className="h-full border-gray-500 border-2 text-transparent select-none">
 							A
 						</span>
 					);
@@ -150,10 +172,11 @@ const Body = (props: any) => {
 			row = [];
 		}
 
+		// Renders the rest of the 5 x 5 grid with blank squares
 		for (let i = 0; i < 5 - squares.total; i++) {
 			for (let t = 0; t < 5; t++) {
 				row.push(
-					<span key={i + t} className="h-full border-gray-500 border-2 text-transparent">
+					<span key={i + t} className="h-full border-gray-500 border-2 text-transparent select-none">
 						A
 					</span>
 				);
